@@ -6,6 +6,7 @@ import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 import android.content.Intent;
 import android.content.res.Configuration;
+import org.devio.rn.splashscreen.SplashScreen; // here
 
 public class MainActivity extends ReactActivity {
 
@@ -21,6 +22,7 @@ public class MainActivity extends ReactActivity {
   // for react-native-screens
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    SplashScreen.show(this);
     super.onCreate(null);
   }
 

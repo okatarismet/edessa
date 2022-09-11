@@ -6,14 +6,13 @@ import { useTranslation } from "react-i18next"
 import { Brand } from "@/Components"
 import { useTheme } from "@/Hooks"
 import { useLazyFetchOneQuery } from "@/Services/modules/users"
-import { changeTheme } from "@/Store/Theme"
+import { changeUser } from "@/Store/User"
 import MaterialIcon from "react-native-vector-icons/MaterialCommunityIcons"
 import { navigate } from "@/Navigators/utils"
 
 // import Text from '@/Components/Text'
 const Login = () => {
   const { t } = useTranslation()
-  const { Common, Fonts, Gutters, Layout } = useTheme()
   const dispatch = useDispatch()
 
   const [userId, setUserId] = useState("9")
@@ -23,9 +22,6 @@ const Login = () => {
     fetchOne(userId)
   }, [fetchOne, userId])
 
-  const onChangeTheme = ({ theme, darkMode }) => {
-    dispatch(changeTheme({ theme, darkMode }))
-  }
   return (
     <RootView>
       <Image
@@ -52,7 +48,12 @@ const Login = () => {
         >
           <Image source={require("../../Assets/Images/Donthaveanaccount.png")} style={{ width: 230, height: 45, margin: 20, resizeMode: "contain" }} />
         </TouchableOpacity>
-        <LoginButton>
+        <LoginButton
+          onPress={() => {
+            dispatch(changeUser({ authenticated: true }))
+            navigate("Main")
+          }}
+        >
           <Text style={{ color: "#FFF" }}>Login</Text>
         </LoginButton>
       </SubView>
