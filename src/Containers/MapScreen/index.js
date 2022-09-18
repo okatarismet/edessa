@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { View, StyleSheet, ActivityIndicator, Text, TextInput, TouchableOpacity, ScrollView, Button } from "react-native"
+import { View, StyleSheet, ActivityIndicator, Text, TextInput, TouchableOpacity, ScrollView, Button, Dimensions } from "react-native"
 import { useDispatch } from "react-redux"
 import { useTranslation } from "react-i18next"
 import { Brand } from "@/Components"
@@ -7,7 +7,7 @@ import { useTheme } from "@/Hooks"
 import { useLazyFetchOneQuery } from "@/Services/modules/users"
 import { changeTheme } from "@/Store/Theme"
 
-import MapView, { Marker } from "react-native-maps"
+import MapView, { Marker, Polyline } from "react-native-maps"
 import Location from "../../Components/Map/myLocation"
 import { useRef } from "react"
 import { TouchableHighlight } from "react-native-gesture-handler"
@@ -22,6 +22,7 @@ const ExampleContainer = () => {
   const [search, onChangeSearch] = useState("")
   const [locationMarked, setLocationMark] = useState(false)
   const [destinationMarked, setDestinationMark] = useState(false)
+  const [showRoad, setShowRoad] = useState(false)
 
   // let address = Geoloc("Beykoz")
   // console.log(address)
@@ -59,6 +60,18 @@ const ExampleContainer = () => {
     })
   }, [latitude, longitude])
 
+  const middler = (myLatitude, myLongitude, latitudeB, longitudeB) => {
+    const window = Dimensions.get("window")
+    const { width, height } = window
+    const LONGITUDE_DELTA = 0.0922 + width / height
+    return {
+      latitude: (myLatitude + latitudeB) / 2,
+      longitude: (myLongitude + longitudeB) / 2,
+      latitudeDelta: 0.0922,
+      longitudeDelta: LONGITUDE_DELTA,
+    }
+  }
+
   const goToIstanbul = () => {
     //Animate the user to new region. Complete this animation in 3 seconds
     mapRef.current.animateToRegion(istanbulRegion, 3 * 1000)
@@ -69,16 +82,18 @@ const ExampleContainer = () => {
   }
 
   const handleGoButtonClick = () => {
-    console.log(loading, latitude, longitude)
+    console.log(loading, myLocation.latitude, myLocation.longitude)
     // if (text === 'Beykoz') {
     //   mapRef.current.animateToRegion(beykoz, 3 * 1000);
     //   setMark(true);
     //   // setClicked(true);
     // }
     // if (clicked) {
-    //   let middle = middler(latitude, longitude, beykoz);
-    //   console.log(middle);
-    //   // mapRef.current.animateToRegion(middle, 3 * 1000);
+    setDestinationMark(true)
+    let middle = middler(myLocation.latitude, myLocation.longitude, beykoz.latitude, beykoz.longitude)
+    console.log("middle", middle)
+    mapRef.current.animateToRegion(middle, 2.5 * 1000)
+    setShowRoad(true)
     // }
   }
 
@@ -93,8 +108,17 @@ const ExampleContainer = () => {
         //onRegionChangeComplete runs when the user stops dragging MapView
         onRegionChangeComplete={region => setRegion(region)}
       >
-        {locationMarked ? <Marker coordinate={myLocation} /> : null}
-        {/* {destinationMarked ? <Marker coordinate={address} /> : null} */}
+        {showRoad && (
+          <Polyline
+            coordinates={[myLocation, beykoz]} //specify our coordinates
+            strokeColor={"#000"}
+            strokeWidth={3}
+            lineDashPattern={[1]}
+          />
+        )}
+
+        {locationMarked && <Marker coordinate={myLocation} />}
+        {destinationMarked && <Marker coordinate={beykoz} />}
       </MapView>
       <View style={[styles.topBar, styles.elevation]}>
         <TextInput style={styles.input} onChangeText={e => onChangeSearch(e)} value={search} />
